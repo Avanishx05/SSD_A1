@@ -1,0 +1,27 @@
+============================================================
+POSTGRESQL PERFORMANCE TEST
+============================================================
+
+Query 1: Freelancer revenue with 7-day moving average
+
+SQL:
+<the actual query>
+
+EXPLAIN ANALYZE output:
+<actual PostgreSQL output goes here>
+
+
+Query 2: Active contract lookup
+
+SQL:
+<actual query>
+
+EXPLAIN ANALYZE output:
+<actual PostgreSQL output>
+
+
+INDEX USED:
+<explain which index was used>
+
+EXECUTION TIME:
+<actual time from PostgreSQL>
