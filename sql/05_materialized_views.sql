@@ -1,13 +1,3 @@
--- ============================================================
--- 05_materialized_views.sql
--- GigTask - Freelancer Lifetime Earnings
--- ============================================================
-
-
--- ------------------------------------------------------------
--- 1. Create materialized view
--- ------------------------------------------------------------
-
 CREATE MATERIALIZED VIEW IF NOT EXISTS freelancer_lifetime_earnings
 AS
 SELECT
@@ -33,11 +23,6 @@ LEFT JOIN contracts c
 GROUP BY
     f.id,
     f.name;
-
-
--- ------------------------------------------------------------
--- 2. Unique index required for CONCURRENTLY refresh
--- ------------------------------------------------------------
 
 CREATE UNIQUE INDEX IF NOT EXISTS
 idx_freelancer_lifetime_earnings_pk
