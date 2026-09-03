@@ -6,17 +6,16 @@ CREATE OR REPLACE PROCEDURE fund_gig(
 LANGUAGE plpgsql
 AS $$
 DECLARE
-    v_current_balance DECIMAL(10,2);
     v_contract_id INTEGER;
 BEGIN
+
     IF p_budget <= 0 THEN
         RAISE EXCEPTION
             'Gig budget must be greater than zero. Received: %',
             p_budget;
     END IF;
 
-    SELECT escrow_balance
-    INTO v_current_balance
+    PERFORM 1
     FROM clients
     WHERE id = p_client_id
     FOR UPDATE;
@@ -25,14 +24,6 @@ BEGIN
         RAISE EXCEPTION
             'Client with ID % does not exist',
             p_client_id;
-    END IF;
-
-    IF v_current_balance < p_budget THEN
-        RAISE EXCEPTION
-            'Insufficient escrow balance for client %. Balance: %, Required: %',
-            p_client_id,
-            v_current_balance,
-            p_budget;
     END IF;
 
     PERFORM 1
@@ -46,7 +37,7 @@ BEGIN
     END IF;
 
     UPDATE clients
-    SET escrow_balance = escrow_balance - p_budget
+    SET escrow_balance = escrow_balance + p_budget
     WHERE id = p_client_id;
 
     INSERT INTO contracts (
