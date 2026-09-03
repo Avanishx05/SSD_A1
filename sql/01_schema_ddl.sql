@@ -1,0 +1,41 @@
+CREATE TABLE "clients" (
+  "id" integer PRIMARY KEY,
+  "name" varchar NOT NULL,
+  "escrow_balance" decimal(10,2) NOT NULL CHECK(escrow_balance >= 0.00),
+  "created_at" timestamp NOT NULL
+);
+
+--place holder action_type until discussed with team.
+CREATE TYPE action_type AS ENUM ('ESCROW_HOLD', 'ESCROW_RELEASE', 'ESCROW_REFUND');
+CREATE TABLE "wallet_audit_logs" (
+  "id" integer PRIMARY KEY,
+  "client_id" integer NOT NULL,
+  "amount_changed" decimal(10,2) NOT NULL,
+  "action_type" action_type,
+  "balance_after" decimal(10,2) NOT NULL,
+  "timestamp" timestamp NOT NULL
+);
+
+CREATE TABLE "freelancers" (
+  "id" integer PRIMARY KEY,
+  "name" varchar NOT NULL,
+  "latitude" decimal(10,4) NOT NULL,
+  "longitude" decimal(10,4) NOT NULL,
+  "is_available" boolean NOT NULL
+);
+
+CREATE TYPE status AS ENUM ('FUNDED', 'IN_PROGRESS', 'COMPLETED');
+CREATE TABLE "contracts" (
+  "id" integer PRIMARY KEY,
+  "client_id" integer NOT NULL,
+  "freelancer_id" integer NOT NULL,
+  "budget" decimal(10,2) NOT NULL,
+  "status" status,
+  "created_at" timestamp NOT NULL
+);
+
+ALTER TABLE "wallet_audit_logs" ADD FOREIGN KEY ("client_id") REFERENCES "clients" ("id")ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+
+ALTER TABLE "contracts" ADD FOREIGN KEY ("client_id") REFERENCES "clients" ("id")ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
+
+ALTER TABLE "contracts" ADD FOREIGN KEY ("freelancer_id") REFERENCES "freelancers" ("id")ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
