@@ -1,8 +1,8 @@
-```python
 import argparse
 import random
 from datetime import datetime
 from decimal import Decimal
+import os
 
 from faker import Faker
 import psycopg2
@@ -30,11 +30,11 @@ DEFAULT_SEED = 42
 
 def get_connection():
     return psycopg2.connect(
-        host="localhost",
-        port=5432,
-        database="gigtask",
-        user="postgres",
-        password="YOUR_POSTGRES_PASSWORD"
+        host=os.getenv("POSTGRES_HOST", "localhost"),
+        port=os.getenv("POSTGRES_PORT", "5432"),
+        database=os.getenv("POSTGRES_DB", "gigtask"),
+        user=os.getenv("POSTGRES_USER", "postgres"),
+        password=os.getenv("POSTGRES_PASSWORD")
     )
 
 
@@ -640,4 +640,4 @@ if __name__ == "__main__":
         audits_count=args.audits,
         seed=args.seed
     )
-```
+
