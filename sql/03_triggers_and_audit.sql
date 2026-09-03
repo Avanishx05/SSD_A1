@@ -1,27 +1,13 @@
--- ============================================================
--- 03_triggers_and_audit.sql
--- GigTask - PostgreSQL Trigger and Escrow Audit Logging
--- ============================================================
-
--- Temporary integration step:
--- M1 currently defines wallet_audit_logs.id as INTEGER PRIMARY KEY
--- without an identity/sequence/default.
--- This will be discussed with the team.
-
 CREATE SEQUENCE IF NOT EXISTS wallet_audit_logs_id_seq;
 
 ALTER TABLE wallet_audit_logs
 ALTER COLUMN id SET DEFAULT nextval('wallet_audit_logs_id_seq');
 
-
--- Trigger function
 CREATE OR REPLACE FUNCTION fn_audit_escrow_balance()
 RETURNS TRIGGER
 LANGUAGE plpgsql
 AS $$
 BEGIN
-
-    -- Audit only when escrow_balance actually changes.
     IF OLD.escrow_balance IS DISTINCT FROM NEW.escrow_balance THEN
 
         INSERT INTO wallet_audit_logs (
@@ -54,7 +40,6 @@ END;
 $$;
 
 
--- Trigger
 DROP TRIGGER IF EXISTS trg_clients_escrow_audit
 ON clients;
 
