@@ -6,26 +6,18 @@ from datetime import datetime, timedelta, timezone
 from faker import Faker
 from pymongo import MongoClient
 
-
 fake = Faker()
 
-
-# --------------------------------------------------
 # MongoDB connection
-# --------------------------------------------------
 
 def get_database():
 
     client = MongoClient(
         "mongodb://localhost:27017/"
     )
+    return client["gig_task"]
 
-    return client["gigtask"]
-
-
-# --------------------------------------------------
 # Geographic regions
-# --------------------------------------------------
 
 CITIES = [
     {
@@ -56,15 +48,33 @@ CITIES = [
 ]
 
 
-# --------------------------------------------------
 # Portfolio documents
-# --------------------------------------------------
 
 def generate_portfolios(count):
 
     documents = []
 
     for _ in range(count):
+
+        certifications = []
+
+        certification_names = [
+            "Safety Certified",
+            "Licensed Technician",
+            "First Aid",
+            "Equipment Certified",
+            "Professional Training"
+        ]
+
+        for certification in random.sample(
+            certification_names,
+            k=random.randint(0, 3)
+        ):
+            certifications.append({
+                "name": certification,
+                "issuer": fake.company(),
+                "year": random.randint(2018, 2026)
+            })
 
         documents.append({
             "_id": str(uuid.uuid4()),
@@ -89,16 +99,20 @@ def generate_portfolios(count):
                 k=random.randint(2, 5)
             ),
 
-            "certifications": random.sample(
-                [
-                    "Safety Certified",
-                    "Licensed Technician",
-                    "First Aid",
-                    "Equipment Certified",
-                    "Professional Training"
-                ],
-                k=random.randint(0, 3)
-            ),
+            "certifications": certifications,
+
+            "projects": [
+                {
+                    "title": fake.sentence(nb_words=4),
+                    "description": fake.paragraph(nb_sentences=2),
+                    "completed_at": fake.date_time_between(
+                        start_date="-2 years",
+                        end_date="now",
+                        tzinfo=timezone.utc
+                    )
+                }
+                for _ in range(random.randint(0, 3))
+            ],
 
             "created_at": fake.date_time_between(
                 start_date="-2 years",
@@ -109,10 +123,8 @@ def generate_portfolios(count):
 
     return documents
 
-
-# --------------------------------------------------
 # Review documents
-# --------------------------------------------------
+
 
 def generate_reviews(count):
 
@@ -143,7 +155,7 @@ def generate_reviews(count):
                 k=random.randint(1, 3)
             ),
 
-            "review": fake.sentence(),
+            "review_text": fake.sentence(),
 
             "created_at": fake.date_time_between(
                 start_date="-1 year",
@@ -154,10 +166,7 @@ def generate_reviews(count):
 
     return documents
 
-
-# --------------------------------------------------
 # Worker location pings
-# --------------------------------------------------
 
 def generate_location_pings(count):
 
@@ -179,7 +188,7 @@ def generate_location_pings(count):
 
         documents.append({
 
-            "worker_id": str(uuid.uuid4()),
+            "freelancer_id": str(uuid.uuid4()),
 
             "location": {
                 "type": "Point",
@@ -206,9 +215,8 @@ def generate_location_pings(count):
     return documents
 
 
-# --------------------------------------------------
 # Main seeding function
-# --------------------------------------------------
+
 
 def seed_database(
     portfolio_count,
@@ -222,9 +230,8 @@ def seed_database(
     reviews = db["GigReviews"]
     locations = db["WorkerLocations"]
 
-    # ----------------------------------------------
+    
     # Portfolios
-    # ----------------------------------------------
 
     print("Generating portfolios...")
 
@@ -232,13 +239,16 @@ def seed_database(
         portfolio_count
     )
 
-    portfolios.insert_many(
-        portfolio_data
+    if portfolio_data:
+        portfolios.insert_many(
+            portfolio_data
+        )
+
+    print(
+        f"Inserted {len(portfolio_data):,} portfolios."
     )
 
-    # ----------------------------------------------
     # Reviews
-    # ----------------------------------------------
 
     print("Generating reviews...")
 
@@ -246,19 +256,21 @@ def seed_database(
         review_count
     )
 
-    reviews.insert_many(
-        review_data
+    if review_data:
+        reviews.insert_many(
+            review_data
+        )
+
+    print(
+        f"Inserted {len(review_data):,} reviews."
     )
 
-    # ----------------------------------------------
+  
     # Locations
-    # ----------------------------------------------
+  
 
     print("Generating worker locations...")
 
-    # IMPORTANT:
-    # Don't generate 500k documents in one huge
-    # Python list.
 
     batch_size = 5_000
 
@@ -288,9 +300,7 @@ def seed_database(
     print("\nMongoDB seeding completed!")
 
 
-# --------------------------------------------------
 # Command-line arguments
-# --------------------------------------------------
 
 if __name__ == "__main__":
 
