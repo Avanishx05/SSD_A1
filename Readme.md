@@ -1,7 +1,7 @@
 # GigTask Database Setup
 
-**GitHub repository:** `<PASTE FINAL REPO URL HERE>`
-**Final commit hash:** `<PASTE FINAL COMMIT HASH HERE — get with git log -1 --format=%H after your last commit>`
+**GitHub repository:** `https://github.com/Avanishx05/4_a1`
+**Final commit hash:** `<PASTE FINAL COMMIT HASH HERE — run git log -1 --format=%H after your last push, update this line last>`
 
 ## Prerequisites
 - PostgreSQL 16+ and MongoDB installed and running locally
@@ -21,6 +21,7 @@
    - SELECT setval(pg_get_serial_sequence('freelancers', 'id'), (SELECT MAX(id) FROM freelancers));
    - SELECT setval(pg_get_serial_sequence('contracts', 'id'), (SELECT MAX(id) FROM contracts));
    - SELECT setval(pg_get_serial_sequence('wallet_audit_logs', 'id'), (SELECT MAX(id) FROM wallet_audit_logs));
+5. Refresh the materialized view after seeding: REFRESH MATERIALIZED VIEW CONCURRENTLY freelancer_lifetime_earnings;
 
 **Run once against a fresh database.** postgres_seeder.py inserts rows with
 explicit, script-assigned IDs and does not TRUNCATE first or use
@@ -32,6 +33,14 @@ to reseed, drop and recreate gigtask_db first.
 1. mongosh gigtask_db mongo/01_collections_and_indexes.js
 2. Seed data: python3 data_generation/mongo_seeder.py
 3. Run workflow scripts: mongo/02_workflow3_geonear.js, mongo/03_workflow4_facet.js
+
+**Note on invocation:** all mongo/*.js scripts are meant to be run with the
+target database passed on the command line, as shown above (mongosh gigtask_db
+<file>.js). 01_collections_and_indexes.js additionally includes an explicit
+use gigtask_db; since it performs schema-creating writes (collections,
+validators, indexes) and should not depend on how it is invoked.
+02_workflow3_geonear.js and 03_workflow4_facet.js rely on the database being
+selected via the command line as shown above.
 
 **mongo_seeder.py is also not idempotent.** It does not drop or clear existing
 documents before inserting, so running it more than once (or with different
