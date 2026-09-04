@@ -1,8 +1,3 @@
-CREATE SEQUENCE IF NOT EXISTS wallet_audit_logs_id_seq;
-
-ALTER TABLE wallet_audit_logs
-ALTER COLUMN id SET DEFAULT nextval('wallet_audit_logs_id_seq');
-
 CREATE OR REPLACE FUNCTION fn_audit_escrow_balance()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -21,11 +16,11 @@ BEGIN
             NEW.id,
             NEW.escrow_balance - OLD.escrow_balance,
 
-            CASE
-                WHEN NEW.escrow_balance < OLD.escrow_balance
+            CASE 
+                WHEN NEW.escrow_balance > OLD.escrow_balance
                     THEN 'ESCROW_HOLD'::action_type
 
-                WHEN NEW.escrow_balance > OLD.escrow_balance
+                WHEN NEW.escrow_balance < OLD.escrow_balance
                     THEN 'ESCROW_RELEASE'::action_type
             END,
 

@@ -1,6 +1,7 @@
 import argparse
 import random
 import uuid
+import os
 from datetime import datetime, timedelta, timezone
 
 from faker import Faker
@@ -11,14 +12,12 @@ fake = Faker()
 # MongoDB connection
 
 def get_database():
-
-    client = MongoClient(
-        "mongodb://localhost:27017/"
-    )
-    return client["gig_task"]
+    mongo_uri = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
+    mongo_db = os.getenv("MONGO_DB", "gigtask_db")
+    client = MongoClient(mongo_uri)
+    return client[mongo_db]
 
 # Geographic regions
-
 CITIES = [
     {
         "name": "Chennai",
@@ -106,7 +105,7 @@ def generate_portfolios(count):
                     "title": fake.sentence(nb_words=4),
                     "description": fake.paragraph(nb_sentences=2),
                     "completed_at": fake.date_time_between(
-                        start_date="-2 years",
+                        start_date="-2y",
                         end_date="now",
                         tzinfo=timezone.utc
                     )
@@ -115,7 +114,7 @@ def generate_portfolios(count):
             ],
 
             "created_at": fake.date_time_between(
-                start_date="-2 years",
+                start_date="-2y",
                 end_date="now",
                 tzinfo=timezone.utc
             )
@@ -158,7 +157,7 @@ def generate_reviews(count):
             "review_text": fake.sentence(),
 
             "created_at": fake.date_time_between(
-                start_date="-1 year",
+                start_date="-1y",
                 end_date="now",
                 tzinfo=timezone.utc
             )
@@ -207,7 +206,7 @@ def generate_location_pings(count):
                 datetime.now(timezone.utc)
                 -
                 timedelta(
-                    minutes=random.randint(0, 120)
+                    seconds=random.randint(0, 300)
                 )
             )
         })

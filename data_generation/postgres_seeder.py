@@ -31,7 +31,7 @@ def get_connection():
     return psycopg2.connect(
         host=os.getenv("POSTGRES_HOST", "localhost"),
         port=os.getenv("POSTGRES_PORT", "5432"),
-        database=os.getenv("POSTGRES_DB", "gigtask"),
+        database=os.getenv("POSTGRES_DB", "gigtask_db"),
         user=os.getenv("POSTGRES_USER", "postgres"),
         password=os.getenv("POSTGRES_PASSWORD")
     )
@@ -50,7 +50,7 @@ def generate_clients(count):
             fake.name(),
             Decimal(str(round(random.uniform(500, 50000), 2))),
             fake.date_time_between(
-                start_date="-2 years",
+                start_date="-2y",
                 end_date="now"
             )
         ))
@@ -154,7 +154,7 @@ def generate_contracts(
             ))),
             status,
             fake.date_time_between(
-                start_date="-2 years",
+                start_date="-2y",
                 end_date="now"
             )
         ))
@@ -334,46 +334,20 @@ def generate_escrow_activity(
 
 
 def reset_sequences(cur):
-
     print("Synchronizing PostgreSQL sequences...")
 
-    sequences = [
-        ("clients", "id", "clients_id_seq"),
-        ("freelancers", "id", "freelancers_id_seq"),
-        ("contracts", "id", "contracts_id_seq"),
-    ]
+    tables = ["clients", "freelancers", "contracts", "wallet_audit_logs"]
 
-    for table, column, sequence in sequences:
-
+    for table in tables:
         cur.execute(
             f"""
             SELECT setval(
-                '{sequence}',
-                COALESCE(
-                    (SELECT MAX({column}) FROM {table}),
-                    1
-                ),
-                true
-            )
+                pg_get_serial_sequence('{table}', 'id'),
+                COALESCE((SELECT MAX(id) FROM {table}), 1),
+                EXISTS (SELECT 1 FROM {table})
+            );
             """
         )
-
-
-    cur.execute(
-        """
-        SELECT setval(
-            'wallet_audit_logs_id_seq',
-            COALESCE(
-                (SELECT MAX(id) FROM wallet_audit_logs),
-                1
-            ),
-            EXISTS (
-                SELECT 1
-                FROM wallet_audit_logs
-            )
-        )
-        """
-    )
 
 
 # Validation

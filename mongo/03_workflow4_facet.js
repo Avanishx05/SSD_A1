@@ -8,7 +8,7 @@
 //
 // Run with mongosh after loading GigReviews.
 
-use gig_task;
+use gigtask_db;
 
 // -----------------------------------------------------------------------------
 // One $facet stage executes three analytical branches over GigReviews.
