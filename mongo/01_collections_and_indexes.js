@@ -9,6 +9,7 @@
 //   - TTL index on WorkerLocations.created_at for 2 hours (7200 seconds)
 //
 // Run with mongosh.
+use gigtask_db;
 
 // -----------------------------------------------------------------------------
 // 1. Portfolios
