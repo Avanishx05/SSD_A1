@@ -34,3 +34,48 @@ Performance captures for Workflow 3 ($geoNear) were taken shortly after seeding.
 - wallet_audit_logs: 150,000+ rows
 - contracts: 60,000+ rows
 - WorkerLocations: 600,000 documents
+
+## PostgreSQL Business Logic
+
+### Escrow Audit Logging
+- `sql/03_triggers_and_audit.sql`
+- `AFTER UPDATE` trigger on `clients.escrow_balance`
+- Automatically records escrow balance changes in `wallet_audit_logs`
+- Records client ID, amount changed, action type, balance after, and timestamp
+
+### Atomic Gig Funding
+- `sql/04_stored_procedures.sql`
+- Implements the `fund_gig()` stored procedure
+- Validates gig budget, client, and freelancer
+- Locks the client row using `FOR UPDATE`
+- Adds the gig budget to the client's escrow balance
+- Creates a `FUNDED` contract
+- Escrow update and contract creation execute atomically
+
+### Freelancer Lifetime Earnings
+- `sql/05_materialized_views.sql`
+- Materialized view: `freelancer_lifetime_earnings`
+- Stores lifetime completed contract count and total completed earnings
+- Unique index on `freelancer_id` supports concurrent refresh
+- Refresh using:
+  - `REFRESH MATERIALIZED VIEW CONCURRENTLY freelancer_lifetime_earnings;`
+
+## PostgreSQL Performance Proof
+
+### Window Analytics
+- `EXPLAIN ANALYZE` confirms use of the `idx_completed_gig` index
+- Index used:
+  - `Index Scan using idx_completed_gig on contracts`
+- Completed contract rows processed: 41,452
+- Execution time: 97.555 ms
+
+### Partial Index Verification
+- `EXPLAIN ANALYZE` confirms use of the `idx_active_gig` partial index
+- Index used:
+  - `Index Scan using idx_active_gig on contracts`
+- Index condition: `freelancer_id = 1`
+- Execution time: 0.577 ms
+
+Complete PostgreSQL execution plans are available in:
+- `performance/postgres_explain_analyzes.txt`
+with an execution time of approximately 0.577 ms.
