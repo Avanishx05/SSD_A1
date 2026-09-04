@@ -10,7 +10,7 @@
 //
 // Run with mongosh after loading WorkerLocations.
 
-use gigtask_db;
+//use gigtask_db;
 
 // -----------------------------------------------------------------------------
 // Job-site coordinates.
