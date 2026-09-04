@@ -1,7 +1,7 @@
 # GigTask Database Setup
 
 **GitHub repository:** `https://github.com/Avanishx05/team_4_a1`
-**Final commit hash:** `85cfd873712f0399ca689cca834291e4dbe9cb61`
+**Final commit hash:** `a263c12d0c40cab3ad1e74bdefb198b3372dc55a`
 
 ## Prerequisites
 - PostgreSQL 16+ and MongoDB installed and running locally
