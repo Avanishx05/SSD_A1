@@ -1,6 +1,6 @@
 # GigTask Database Setup
 
-**GitHub repository:** `https://github.com/Avanishx05/4_a1`
+**GitHub repository:** `https://github.com/Avanishx05/team_4_a1`
 **Final commit hash:** `85cfd873712f0399ca689cca834291e4dbe9cb61`
 
 ## Prerequisites
